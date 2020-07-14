@@ -1,0 +1,7 @@
+.idea
+*.py[cod]
+venv
+
+# my stuff
+*.bak*
+bak/
