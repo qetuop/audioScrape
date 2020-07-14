@@ -1,32 +1,16 @@
-from selenium import webdriver
 from bs4 import BeautifulSoup
 import requests
 import urllib.request
-import wget
-from urllib.request import urlopen
 import os
 import time
 import eyed3
-import sys
 import json
 
-#DOWNLOADS = 'downloads'
 DOWNLOAD_DIR = ''
-#count = 0  # if there are multiple pages it restarts the mp3 numbering at 1, use my own counter
 
 def grabUrls():
     with open("urls.txt") as file:  # Use file to refer to the file object
-        #data = file.readlines()
-        #data = map(lambda v: v.strip(), file.readlines())
-
-        # data = list(map(str.strip, file.readlines())) # doesn't catch empty lines
-        #data = []
-        #for url in file.readlines():
-        #    if ( url.strip() != '' ):
-        #        data.append(url.strip())
-
         data = [line.strip() for line in file.readlines() if line.strip()]
-
         return data
 
 
@@ -48,8 +32,8 @@ def createSaveDir(URL):
     with open(sourceFile, 'w') as file:
         file.write(URL)
 
+# Check if there are multiple pages
 def grabPages(soup, pagesToScrapeList):
-    # Check if there are multiple pages
     # <a href="https://bigaudiobooks.net/thud/3/" class="post-page-numbers">3</a>
     results = soup.find_all(class_='post-page-numbers')
     if (len(results) != 0):
@@ -68,22 +52,17 @@ src="https://ipaudio4.com/wp-content/uploads/BIG/Thud/09.mp3?_=1">
 </audio>
 '''
 def grabAudio(URL):
-    #global count
-
     print(URL)
     page = requests.get(URL)
     soup = BeautifulSoup(page.content, 'html.parser')
 
     results = soup.find_all(class_='wp-audio-shortcode')
     for elem in results:
-        #count += 1
-
         print(elem)
         href = elem.a['href']
         print(href)
 
         filename = href.split('/')[-1]
-        #filename = '{}.{}'.format(count,'mp3')
         localFileName = os.path.join(DOWNLOAD_DIR, filename)
         print(localFileName)
 
@@ -94,8 +73,6 @@ def grabAudio(URL):
 
         t = eyed3.load(localFileName)
         print(t.tag.title)
-
-
 
 '''
 <img src="https://bigaudiobooks.b-cdn.net/wp-content/uploads/2018/11/517UdroKvTL._SX319_BO1,204,203,200_.jpg" 
