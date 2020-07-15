@@ -7,6 +7,7 @@ import time
 import eyed3
 import json
 import sys
+from pathvalidate import sanitize_filename
 
 DOWNLOAD_DIR = ''
 
@@ -91,7 +92,7 @@ def grabCover(soup):
 
     for elem in results:
         coverImg = elem.get('src')
-        coverName = elem.get('alt') + '.jpg'
+        coverName = sanitize_filename(elem.get('alt')) + '.jpg'
 
         localFileName = os.path.join(DOWNLOAD_DIR, coverName)
 
