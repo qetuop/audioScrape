@@ -19,7 +19,7 @@ def grabUrls():
 def createSaveDir(URL):
     global DOWNLOAD_DIR
 
-    config = json.loads(open('config.json').read().replace('//', '\\'))  # can't handle windows path '\' make sure it is "\\" or figure out a replace here
+    config = json.loads(open('config.json').read().replace('\\', '/'))  # can't handle windows path '\' make sure it is "\\" or figure out a replace here
     downloads = config['downloads']
     #print(downloads)
 
@@ -144,7 +144,7 @@ if __name__ == "__main__":
             grabAudio(page)
 
         with open('scrapped.txt', 'a') as file:
-            file.writeln(url)
+            file.write('{}\n'.format(url))
 
     logging.info('Total Time: {} mins'.format( (time.monotonic() - start_time) / 60) )
 
