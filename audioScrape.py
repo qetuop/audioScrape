@@ -1,3 +1,4 @@
+import logging
 from bs4 import BeautifulSoup
 import requests
 import urllib.request
@@ -5,6 +6,7 @@ import os
 import time
 import eyed3
 import json
+import sys
 
 DOWNLOAD_DIR = ''
 
@@ -17,18 +19,19 @@ def grabUrls():
 def createSaveDir(URL):
     global DOWNLOAD_DIR
 
-    config = json.loads(open('config.json').read())
+    config = json.loads(open('config.json').read().replace('//', '\\'))  # can't handle windows path '\' make sure it is "\\" or figure out a replace here
     downloads = config['downloads']
+    #print(downloads)
 
     bookName = URL.split('/')[-2]
-    print(bookName)
+    #print(bookName)
     DOWNLOAD_DIR = os.path.join(downloads, bookName)
 
     if not os.path.exists(DOWNLOAD_DIR):
         os.makedirs(DOWNLOAD_DIR)
 
     sourceFile = os.path.join(DOWNLOAD_DIR,"audioScrape.txt")
-    print(sourceFile)
+    #print(sourceFile)
     with open(sourceFile, 'w') as file:
         file.write(URL)
 
@@ -52,60 +55,76 @@ src="https://ipaudio4.com/wp-content/uploads/BIG/Thud/09.mp3?_=1">
 </audio>
 '''
 def grabAudio(URL):
-    print(URL)
+    logging.info('Grabbing:{}'.format(URL))
+
     page = requests.get(URL)
     soup = BeautifulSoup(page.content, 'html.parser')
 
     results = soup.find_all(class_='wp-audio-shortcode')
     for elem in results:
-        print(elem)
+        #print(elem)
         href = elem.a['href']
-        print(href)
+        #print(href)
 
         filename = href.split('/')[-1]
         localFileName = os.path.join(DOWNLOAD_DIR, filename)
-        print(localFileName)
+        #print(localFileName)
 
         opener = urllib.request.build_opener()
         opener.addheaders = [('User-agent', 'Mozilla/5.0')]
         urllib.request.install_opener(opener)
         urllib.request.urlretrieve(href, localFileName)
 
-        t = eyed3.load(localFileName)
-        print(t.tag.title)
+        #t = eyed3.load(localFileName)
+        #print(t.tag.title)
+
+        logging.info('Grabbed: {}'.format(localFileName))
 
 '''
 <img src="https://bigaudiobooks.b-cdn.net/wp-content/uploads/2018/11/517UdroKvTL._SX319_BO1,204,203,200_.jpg" 
 alt="The Colour Of Magic Audiobook" width="178" height="277">
 '''
 def grabCover(soup):
-    results = soup.find_all('img')
+
+    main = soup.find(id='main')
+    results = main.find_all('img')
+
     for elem in results:
         coverImg = elem.get('src')
-        coverName = elem.get('alt')
+        coverName = elem.get('alt') + '.jpg'
 
-        if ( 'https://bigaudiobooks.b-cdn.net/wp-content/uploads' in coverImg ):
-            coverName = coverName + '.jpg'
-            localFileName = os.path.join(DOWNLOAD_DIR, coverName)
+        localFileName = os.path.join(DOWNLOAD_DIR, coverName)
 
-            opener = urllib.request.build_opener()
-            opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-            urllib.request.install_opener(opener)
-            urllib.request.urlretrieve(coverImg, localFileName)
+        opener = urllib.request.build_opener()
+        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+        urllib.request.install_opener(opener)
+        urllib.request.urlretrieve(coverImg, localFileName)
 
 
-
+##############
+#       MAIN
+##############
 if __name__ == "__main__":
+    logging.basicConfig(filename='app.log', filemode='w', format='%(levelname)s - %(message)s', level=logging.INFO)
+
     start_time = time.monotonic()
+    logging.info('Start Time: {}'.format(start_time))
+
     #URL = 'https://bigaudiobooks.net/thud/'  # multiple pages
     #URL = 'https://bigaudiobooks.net/the-colour-of-magic/'   # 1 page
 
     urls = grabUrls()
-    print(urls)
+    #print(urls)
 
     for url in urls:
-        print(url)
-        page = requests.get(url)
+        logging.info('Parsing: {}'.format(url))
+
+        try:
+            page = requests.get(url)
+        except:
+            logging.ERROR('Could not Parse: {}'.format(url))
+            continue
+
         soup = BeautifulSoup(page.content, 'html.parser')
 
         pagesToScrapeList = [url]
@@ -122,8 +141,12 @@ if __name__ == "__main__":
 
         # Grab audio files
         for page in pagesToScrapeList:
-            pass#grabAudio(page)
+            grabAudio(page)
 
-    print('minutes: ', (time.monotonic() - start_time) / 60)
+        with open('scrapped.txt', 'a') as file:
+            file.writeln(url)
+
+    logging.info('Total Time: {} mins'.format( (time.monotonic() - start_time) / 60) )
+
 
 

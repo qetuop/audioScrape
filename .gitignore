@@ -3,6 +3,12 @@
 venv
 downloads/
 
+# only need once
+urls.txt
+
+app.log
+scrapped.txt
+
 # my stuff
 *.bak*
 bak/
