@@ -106,6 +106,7 @@ def grabCover(soup):
 ##############
 if __name__ == "__main__":
     logging.basicConfig(filename='app.log', filemode='w', format='%(levelname)s - %(message)s', level=logging.INFO)
+    logging.getLogger().addHandler(logging.StreamHandler())
 
     start_time = time.monotonic()
     logging.info('Start Time: {}'.format(start_time))
@@ -146,7 +147,7 @@ if __name__ == "__main__":
         with open('scrapped.txt', 'a') as file:
             file.write('{}\n'.format(url))
 
-    logging.info('Total Time: {} mins'.format( (time.monotonic() - start_time) / 60) )
+    logging.info('Total Time: {} mins'.format( round( ((time.monotonic() - start_time) / 60),2) ) )
 
 
 
