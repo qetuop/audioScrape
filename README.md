@@ -1,7 +1,3 @@
-- scrapper for sites:
-https://bigaudiobooks.net
-https://99audiobooks.com
-
 - set the "downloads" field in config.json
 defaults to "downlods", will create if missing
 

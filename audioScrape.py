@@ -87,7 +87,7 @@ alt="The Colour Of Magic Audiobook" width="178" height="277">
 '''
 def grabCover(soup):
 
-    main = soup.find(id='main')
+    main = soup.find(id='content')
     results = main.find_all('img')
 
     for elem in results:
