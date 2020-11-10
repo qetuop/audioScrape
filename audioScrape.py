@@ -41,7 +41,7 @@ def grabSite(url):
 
     # iterate over all site pages grabing each book within the page
     currPage = 1
-    for currPage in range(1, 2):#maxPage+1):
+    for currPage in range(1, maxPage+1):
         currUrl = url + 'page/' + str(currPage)
         print(currUrl)
         try:
