@@ -114,14 +114,23 @@ def grabAudio(URL):
     for elem in results:
         #print(elem)
         href = elem.a['href']
-        print(href)
+        #print(href)
 
-        # decode escaped strings
-        filename = urllib.parse.unquote(href.split('/')[-1]) #.encode('ascii', errors='ignore').decode("utf-8") #.encode('ascii', errors='ignore')
+        # decode escaped strings, remove any leading/trailing ws after conversion
+        filename = urllib.parse.unquote(href.split('/')[-1]).strip() #.encode('ascii', errors='ignore').decode("utf-8") #.encode('ascii', errors='ignore')
         #filename = re.sub(r'[^\x00-\x7f]', r'', filename)
-        print(filename)
+        #print(filename)
         localFileName = os.path.join(DOWNLOAD_DIR, filename)
         #print(localFileName)
+
+        # if leading char of filename part of href is a space urlretrieve will fail
+        # https://ipaudio5.com/wp-content/uploads//STARR/40k/Fulgrim/%201.mp3
+        # if I remove the hex space "%20" it works.  is this expected?
+        # use the 'clean' filename from above, put the hexcode back in.
+        # urljoin takes evertyhing up to the last parte (the file name) and replaces with
+        # the 2nd argument
+        href = urllib.parse.urljoin(href,urllib.parse.quote(filename))
+        print(href)
 
         opener = urllib.request.build_opener()
         opener.addheaders = [('User-agent', 'Mozilla/5.0')]
@@ -171,13 +180,17 @@ if __name__ == "__main__":
     # TODO: add to a "sites.txt"
     site = 'https://staraudiobook.com/series/40k/'
     urls = grabSite(site)
-    #print(urls)
+    print(urls)
+    with open('tmp.txt','w') as file:
+        for url in urls:
+            file.write("%s\n"%url)
+
     #sys.exit(0)
 
 
     # get urls from text file (urls.txt)
     # TODO: add these to the ones from the sites above
-    #urls = grabUrls()
+    urls = grabUrls()
 
     print(urls)
 
